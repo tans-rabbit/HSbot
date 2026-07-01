@@ -26,6 +26,8 @@ class HelpView(View):
                 name="🔹 スラッシュコマンド",
                 value=(
                     "`/admin` - 管理者専用コマンド確認(管理者専用)\n"
+                    "`/bal` - 所持金を獲得\n"
+                    "`/daily` - デイリー報酬を獲得\n"
                     "`/dentaku` - 電卓の使い方\n"
                     "`/embednew` - Embed作成\n"
                     "`/embededit` - Embed編集\n"
