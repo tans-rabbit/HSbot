@@ -7,7 +7,6 @@ import random
 import json
 import db
 
-
 # =========================
 # 🎴 おみくじ
 # =========================
@@ -137,7 +136,7 @@ async def daily(interaction: discord.Interaction):
     # =========================
     # ✅ 報酬付与
     # =========================
-    reward = 1000
+    reward = 5000
     user["points"] += reward
     user["last_daily"] = str(today)
 
@@ -180,46 +179,39 @@ async def daily(interaction: discord.Interaction):
 
 
 @app_commands.command(name="bal", description="所持ポイントを確認")
-async def bal(interaction: discord.Interaction):
+async def bal(
+    interaction: discord.Interaction,
+    user: discord.User | None = None
+):
 
     bot = interaction.client
 
-    # ✅ DB読み込み
+    # 未指定なら自分
+    if user is None:
+        user = interaction.user
+
     data, msg = await db.load_data(bot, db.POINT_CHANNEL_ID)
 
-    uid = str(interaction.user.id)
+    uid = str(user.id)
 
-    # =========================
-    # ✅ データ無かったら作る
-    # =========================
+    # データがなければ作成
     if uid not in data:
         data[uid] = {
             "points": 1024,
-            "last_daily": "2000-01-01"
+            "last_daily": None
         }
 
         await msg.edit(content=json.dumps(data))
 
     points = data[uid]["points"]
 
-    # =========================
-    # ✅ 表示
-    # =========================
     embed = discord.Embed(
         title="💰 所持ポイント",
         description=(
-            f"{interaction.user.mention}\n\n"
+            f"{user.mention}\n\n"
             f"現在のポイント: **{points}pt**"
         ),
         color=0xf1c40f
-    )
-
-    import datetime as dt
-    embed.timestamp = dt.datetime.now(dt.UTC)
-
-    embed.set_footer(
-        text=bot.user.name,
-        icon_url=bot.user.display_avatar.url
     )
 
     await interaction.response.send_message(embed=embed)
