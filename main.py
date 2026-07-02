@@ -310,6 +310,8 @@ async def embededit(
     description: str = None,
     color: str = None
 ):
+    description = description.replace("\\n", "\n")
+    
     await interaction.response.defer(ephemeral=True)
 
     try:
@@ -353,18 +355,33 @@ async def embededit(
     except Exception:
         await interaction.followup.send("❌ 編集に失敗しました（権限不足など）")
 
+
+
+
 # ==== メッセージ送信コマンド =====
 
 @bot.tree.command(name="send", description="メッセージ送信")
 async def send(interaction: discord.Interaction, content: str):
 
-    # ✅ 改行対応
-    content = content.replace("\\n", "\n")
+    # メンション判定
+    has_everyone = "@everyone" in content
+    has_here = "@here" in content
+    has_role_mention = re.search(r"<@&\d+>", content)
 
-    # ✅ チャンネルに送信
+    # 管理者以外は拒否
+    if (has_everyone or has_here or has_role_mention):
+        if (
+            interaction.guild
+            and not interaction.user.guild_permissions.administrator
+        ):
+            return await interaction.response.send_message(
+                "❌ @everyone・@here・ロールメンションは管理者のみ使用できます",
+                ephemeral=True
+            )
+
+    # 送信
     await interaction.channel.send(content)
 
-    # ✅ ログ（本人だけ）
     await interaction.response.send_message(
         "✅ 送信しました",
         ephemeral=True
