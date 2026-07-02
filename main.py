@@ -167,7 +167,7 @@ async def on_ready():
         await help.setup(bot)
         loaded = True
 
-    await send_log(bot, f"✅ Bot起動：{bot.user} started at {start_time} (uptime: {datetime.datetime.now() - start_time})")
+    await send_log(bot, f"☑️ Bot起動：{bot.user} started at {start_time} (uptime: {datetime.datetime.now() - start_time})")
     print("✅ successfully loaded",YELLOW,BOLD,"minigame.py","help.py",RESET,RESET,"commands!")
 
     try:
@@ -175,6 +175,8 @@ async def on_ready():
         
         print(f"synced:",YELLOW,BOLD,f"{len(synced)}",RESET,"commands have been synced!")
         print(GREEN,[cmd.name for cmd in synced],RESET)
+        await send_log(bot, f"✅ コマンド同期完了：{len(synced)} commands have been synced!")
+        await send_log(bot, f"✅ コマンド一覧：{[cmd.name for cmd in synced]}")
     except Exception as e:
         print(e)
         
@@ -290,6 +292,7 @@ async def embednew(interaction: discord.Interaction, title: str, description: st
     # ✅ 実際のEmbedはチャンネルに送信
     await interaction.channel.send(embed=embed)
     print(YELLOW,BOLD,f"[{datetime.datetime.now()}]",interaction.user,RESET,"runned /embednew and created embed")
+    await send_log(bot, f"✅ Embed作成：{interaction.user} created an embed with title '{title}' and description '{description}' and color '{color}'.")
 
 # ===== embed編集コマンド=====
 
@@ -346,6 +349,7 @@ async def embededit(
         await message.edit(embed=new_embed)
         await interaction.followup.send("✅ Embedを更新しました")
         print(YELLOW,BOLD,f"[{datetime.datetime.now()}]",interaction.user,RESET,"runned /embededit and edited embed")
+        await send_log(bot, f"✅ Embed編集：{interaction.user} edited an embed with ID '{message_id}'")
     except Exception:
         await interaction.followup.send("❌ 編集に失敗しました（権限不足など）")
 
@@ -366,6 +370,7 @@ async def send(interaction: discord.Interaction, content: str):
         ephemeral=True
     )
     print(YELLOW,BOLD,f"[{datetime.datetime.now()}]",interaction.user,RESET,"runned /send and sent message")
+    await send_log(bot, f"✅ メッセージ送信：{interaction.user} sent a message: '{content}'")
 
 # === メッセージ編集コマンド =====
 
@@ -383,7 +388,7 @@ async def edit(interaction: discord.Interaction, message_id: str, content: str):
             ephemeral=True
         )
         print(YELLOW,BOLD,f"[{datetime.datetime.now()}]",interaction.user,RESET,"runned /edit and edited message")
-
+        await send_log(bot, f"✅ メッセージ編集：{interaction.user} edited a message with ID '{message_id}'")
     except:
         await interaction.response.send_message(
             "❌ メッセージが見つかりません",
@@ -421,6 +426,7 @@ async def ping(interaction: discord.Interaction):
 
     print(BOLD,f"{interaction.user}",RESET,"runned /ping")
     print("Latency:",YELLOW,f"{latency}ms",RESET)
+    await send_log(bot, f"✅ Pingコマンド実行：{interaction.user} ran /ping with latency {latency}ms")
 
     await interaction.response.send_message(embed=embed)
 
@@ -480,7 +486,6 @@ async def dice(ctx, arg: str):
     embed.set_footer(
         text=bot.user.name
     )
-    print(BOLD,f"{ctx.author}",RESET,"runned !dice with argument:",YELLOW,f"{arg}",RESET)
 
     await ctx.send(embed=embed)
 
@@ -521,7 +526,7 @@ async def delall(ctx, message_id: int):
         text=ctx.author
     )
     print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages after message ID {message_id} using !delall.",RESET)
-
+    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages after message ID {message_id} using !delall.")
     await ctx.send(embed=embed)
 
 #=== メッセージ削除コマンド（ユーザー件数指定） =====
@@ -556,7 +561,7 @@ async def delnum(ctx, member: discord.Member, count: int):
     embed.timestamp = datetime.datetime.now(datetime.UTC)
     embed.set_footer(text=ctx.author)
     print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !delnum, count {count}.",RESET)
-
+    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delnum, count {count}.")
     await ctx.send(embed=embed)
 
 #=== メッセージ削除コマンド（ユーザー時間指定） =====
@@ -592,7 +597,7 @@ async def deltime(ctx, member: discord.Member, minutes: int):
     embed.timestamp = datetime.datetime.now(datetime.UTC)
     embed.set_footer(text=ctx.author)
     print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !deltime, within {minutes} minutes.",RESET)
-
+    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !deltime, within {minutes} minutes.")
     await ctx.send(embed=embed)
 
 #=== メッセージ削除コマンド（ユーザー指定・メッセージID以降） =====
@@ -626,7 +631,7 @@ async def delfrom(ctx, member: discord.Member, message_id: int):
     embed.timestamp = datetime.datetime.now(datetime.UTC)
     embed.set_footer(text=ctx.author)
     print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}.",RESET)
-
+    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}.")
     await ctx.send(embed=embed)
 
 #==== モーダル入力によるメッセージ削除 =====
@@ -742,7 +747,7 @@ class DelModal(discord.ui.Modal):
         embed.timestamp = datetime.datetime.now(datetime.UTC)
         embed.set_footer(text=bot.user.name)
         print(RED,BOLD,f"[{datetime.datetime.now()}] {interaction.user}",RESET,f" deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'.",RESET)
-
+        await send_log(bot, f"🧹 メッセージ削除：{interaction.user} deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'.")
         await interaction.response.send_message(embed=embed)
 #==== 上記を踏まえたスラッシュコマンドによるメッセージ削除 =====
 @bot.tree.command(name="del", description="メッセージ削除（入力パネル）")
@@ -906,6 +911,93 @@ async def dentaku(interaction: discord.Interaction):
     embed.set_footer(text="例: !calc sqrt(16)+2*5")
 
     await interaction.response.send_message(embed=embed)
+
+
+
+
+
+
+
+# === Bot情報コマンド =====
+
+
+@bot.tree.command(name="info", description="Bot情報を表示")
+async def info(interaction: discord.Interaction):
+
+    bot_client = interaction.client
+
+    # ===== 稼働時間 =====
+    uptime = datetime.datetime.now(datetime.UTC) - start_time
+
+    days = uptime.days
+    hours, rem = divmod(uptime.seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+
+    # ===== メモリ使用量 =====
+    process = psutil.Process()
+    memory_mb = process.memory_info().rss / 1024 / 1024
+
+    # ===== DB容量 =====
+    omikuji_data, _ = await db.load_omikuji(bot_client)
+    point_data, _ = await db.load_point(bot_client)
+
+    total_db_size = (
+        len(str(omikuji_data).encode("utf-8"))
+        + len(str(point_data).encode("utf-8"))
+    )
+
+    db_size_kb = total_db_size / 1024
+
+    # ===== Botファイルサイズ =====
+    files = [
+        "main.py",
+        "db.py",
+        "help.py",
+        "minigame.py"
+    ]
+
+    total_size = 0
+
+    for file in files:
+        if os.path.exists(file):
+            total_size += os.path.getsize(file)
+
+    bot_size_kb = total_size / 1024
+
+    embed = discord.Embed(
+        title="🤖 Bot情報",
+        color=0x3498db
+    )
+
+    embed.add_field(
+        name="📊 システム",
+        value=(
+            f"⏱ 稼働時間: {days}日 {hours}時間 {minutes}分 {seconds}秒\n"
+            f"💾 メモリ使用量: {memory_mb:.2f} MB\n"
+            f"📦 Botサイズ: {bot_size_kb:.2f} KB\n"
+            f"🗄️ DB容量: {db_size_kb:.2f} KB"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔧 Discord",
+        value=(
+            f"サーバー数: {len(bot.guilds)}\n"
+            f"コマンド数: {len(bot.tree.get_commands())}"
+        ),
+        inline=False
+    )
+
+    embed.timestamp = datetime.datetime.now(datetime.UTC)
+
+    embed.set_footer(
+        text=bot.user.name,
+        icon_url=bot.user.display_avatar.url
+    )
+
+    await interaction.response.send_message(embed=embed)
+
 
 
 

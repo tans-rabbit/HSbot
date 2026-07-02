@@ -75,7 +75,7 @@ async def omikuji(interaction: discord.Interaction):
 # 💰デイリー
 # =========================
 
-@app_commands.command(name="daily", description="1日1回1000ポイントもらえる")
+@app_commands.command(name="daily", description="1日1回5000ポイントもらえる")
 async def daily(interaction: discord.Interaction):
 
     bot = interaction.client
@@ -92,17 +92,21 @@ async def daily(interaction: discord.Interaction):
     # =========================
     if uid not in data:
         data[uid] = {
-            "points": 1024 + 1000,
+            "points": 1024 + 5000,
             "last_daily": str(today)
         }
 
         await msg.edit(content=json.dumps(data))
 
-        return await interaction.response.send_message(
-            f"💰 デイリー\n\n{interaction.user.mention}\n"
-            f"**+1000pt!**\n"
-            f"合計: {data[uid]['points']}pt"
-        )
+        return await interaction.response.send_message(embed=discord.Embed(
+            title="💰 デイリー",
+            description=(
+                f"{interaction.user.mention}\n"
+                f"**+5000pt!**\n"
+                f"合計: {data[uid]['points']}pt"
+            ),
+            color=0x2ecc71
+        ))
 
     user = data[uid]
 
@@ -126,7 +130,8 @@ async def daily(interaction: discord.Interaction):
         return await interaction.response.send_message(embed=discord.Embed(
             f"❌ 今日はもう受け取っています\n\n"
             f"💳 現在: {user['points']}pt",
-            ephemeral=True
+            ephemeral=True,
+            color=0xe74c3c
         ))
 
     # =========================
@@ -147,7 +152,7 @@ async def daily(interaction: discord.Interaction):
         title="💰 デイリーボーナス",
         description=(
             f"{interaction.user.mention}\n\n"
-            f"**+1000pt!**\n"
+            f"**+5000pt!**\n"
             f"💳 合計: {user['points']}pt"
         ),
         color=0x2ecc71

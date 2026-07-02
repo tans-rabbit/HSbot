@@ -86,3 +86,17 @@ async def get_data_size(bot, channel_id):
     count = len(data)
 
     return size, count
+
+#===== データ情報取得 =====
+
+async def get_data_info(bot, channel_id):
+
+    data, _ = await load_data(bot, channel_id)
+
+    if data is None:
+        return 0, 0
+
+    size = len(json.dumps(data).encode("utf-8"))
+    users = len(data)
+
+    return users, size
