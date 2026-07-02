@@ -363,6 +363,8 @@ async def embededit(
 @bot.tree.command(name="send", description="メッセージ送信")
 async def send(interaction: discord.Interaction, content: str):
 
+    content = content.replace("\\n", "\n")
+    
     # メンション判定
     has_everyone = "@everyone" in content
     has_here = "@here" in content
