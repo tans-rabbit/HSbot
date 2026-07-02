@@ -944,7 +944,7 @@ async def info(interaction: discord.Interaction):
     bot_client = interaction.client
 
     # ===== 稼働時間 =====
-    uptime = datetime.datetime.now(datetime.UTC) - start_time
+    uptime = datetime.datetime.now() - start_time
 
     days = uptime.days
     hours, rem = divmod(uptime.seconds, 3600)
@@ -1006,7 +1006,7 @@ async def info(interaction: discord.Interaction):
         inline=False
     )
 
-    embed.timestamp = datetime.datetime.now(datetime.UTC)
+    embed.timestamp = datetime.datetime.now()
 
     embed.set_footer(
         text=bot.user.name,
