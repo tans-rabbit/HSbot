@@ -952,9 +952,6 @@ async def info(interaction: discord.Interaction):
     hours, rem = divmod(uptime.seconds, 3600)
     minutes, seconds = divmod(rem, 60)
 
-    # ===== メモリ使用量 =====
-    process = psutil.Process()
-    memory_mb = process.memory_info().rss / 1024 / 1024
 
     # ===== DB容量 =====
     omikuji_data, _ = await db.load_omikuji(bot_client)
@@ -992,7 +989,6 @@ async def info(interaction: discord.Interaction):
         name="📊 システム",
         value=(
             f"⏱ 稼働時間: {days}日 {hours}時間 {minutes}分 {seconds}秒\n"
-            f"💾 メモリ使用量: {memory_mb:.2f} MB\n"
             f"📦 Botサイズ: {bot_size_kb:.2f} KB\n"
             f"🗄️ DB容量: {db_size_kb:.2f} KB"
         ),
