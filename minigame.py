@@ -295,3 +295,4 @@ async def setup(bot):
     bot.tree.add_command(omikuji)
     bot.tree.add_command(daily)
     bot.tree.add_command(bal)
+    bot.tree.add_command(learderboard)
