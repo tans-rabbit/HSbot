@@ -219,6 +219,75 @@ async def bal(
 
 
 
+
+
+
+@app_commands.command(name="leaderboard", description="ポイントランキング")
+async def leaderboard(interaction: discord.Interaction):
+
+    bot = interaction.client
+
+    data, _ = await db.load_point(bot)
+
+    # ポイント順にソート
+    ranking = sorted(
+        data.items(),
+        key=lambda x: x[1]["points"],
+        reverse=True
+    )
+
+    if not ranking:
+        return await interaction.response.send_message(
+            "📭 データがありません"
+        )
+
+    lines = []
+
+    for i, (uid, user_data) in enumerate(ranking[:10], start=1):
+
+        user = bot.get_user(int(uid))
+
+        if user:
+            name = user.name
+        else:
+            name = f"Unknown ({uid})"
+
+        points = user_data["points"]
+
+        medal = ""
+
+        if i == 1:
+            medal = "🥇"
+        elif i == 2:
+            medal = "🥈"
+        elif i == 3:
+            medal = "🥉"
+
+        lines.append(
+            f"{medal} **{i}位** {name} - {points:,}pt"
+        )
+
+    embed = discord.Embed(
+        title="🏆 ポイントランキング",
+        description="\n".join(lines),
+        color=0xf1c40f
+    )
+
+    embed.set_footer(
+        text=f"参加者数: {len(data)}人"
+    )
+
+    await interaction.response.send_message(embed=embed)
+
+
+
+
+
+
+
+
+
+
 # =========================
 # 🔧 setup（登録）
 # =========================
