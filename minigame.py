@@ -135,9 +135,10 @@ async def daily(interaction: discord.Interaction):
     # =========================
     if last_date == today:
         return await interaction.response.send_message(embed=discord.Embed(
+            title="エラー",
             description=(
-            f"❌ 今日はもう受け取っています\n\n"
-            f"💳 現在: {user['points']}pt",
+            f"❌ 今日はもう受け取っています\n"
+            f"💳 現在: {user['points']}pt"
             ),
             color=0xe74c3c
         ))
