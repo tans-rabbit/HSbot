@@ -28,13 +28,21 @@ async def omikuji(interaction: discord.Interaction):
 
     # ✅ 結果
     results = [
-        {"name": "大吉", "text": "今日は最高の1日!✨", "color": 0xffd700},
-        {"name": "中吉", "text": "いいことが起きそう!😊", "color": 0x00ffcc},
-        {"name": "小吉", "text": "小さな幸せが見つかる日 🍀", "color": 0x66ff66},
-        {"name": "吉",   "text": "安定した良い日 👍", "color": 0x3498db},
-        {"name": "末吉", "text": "後半から運気アップ? 🔼", "color": 0x95a5a6},
-        {"name": "凶",   "text": "慎重にいこう ⚠️", "color": 0xe67e22},
-        {"name": "大凶", "text": "今日は無理せず… 😢", "color": 0xe74c3c},
+        {"name": "大吉", "text": "今日は最高の1日！✨", "color": 0xffd700},
+        {"name": "吉",   "text": "いいことが起きるかも?", "color": 0x3498db},
+        {"name": "吉",   "text": "いいことが起きるかも?", "color": 0x3498db},
+        {"name": "中吉", "text": "まあまあ良い運勢。努力次第で運気向上！", "color": 0x00ffcc},
+        {"name": "中吉", "text": "努力次第で運勢が上がるかも！", "color": 0x00ffcc},
+        {"name": "小吉", "text": "小さな幸せがあるかも!", "color": 0x66ff66},
+        {"name": "小吉", "text": "小さな幸せがあるかも!", "color": 0x66ff66},
+        {"name": "末吉", "text": "これから運気が上昇するかも？", "color": 0x95a5a6},
+        {"name": "末吉", "text": "これから運気が上昇するかも？", "color": 0x95a5a6},
+        {"name": "平吉", "text": "今日は普通の日になりそう", "color": 0x95a5a6},
+        {"name": "平吉", "text": "今日は普通の日になりそう", "color": 0x95a5a6},
+        {"name": "平吉", "text": "今日は普通の日になりそう", "color": 0x95a5a6},
+        {"name": "凶",   "text": "慎重に。無理しないで", "color": 0xe67e22},
+        {"name": "凶",   "text": "慎重に。無理しないで", "color": 0xe67e22},
+        {"name": "大凶", "text": "慎重に。リスクは避けよう", "color": 0xe74c3c},
     ]
 
     result = random.choice(results)
