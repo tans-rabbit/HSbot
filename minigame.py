@@ -138,7 +138,7 @@ async def daily(interaction: discord.Interaction):
             description=(
             f"❌ 今日はもう受け取っています\n\n"
             f"💳 現在: {user['points']}pt",
-            )
+            ),
             color=0xe74c3c
         ))
 
@@ -230,6 +230,10 @@ async def bal(
 
 
 
+
+# =========================
+# リーダーボード
+# =========================
 
 @app_commands.command(name="leaderboard", description="ポイントランキング")
 async def leaderboard(interaction: discord.Interaction):
