@@ -137,7 +137,6 @@ async def daily(interaction: discord.Interaction):
         return await interaction.response.send_message(embed=discord.Embed(
             f"❌ 今日はもう受け取っています\n\n"
             f"💳 現在: {user['points']}pt",
-            ephemeral=True,
             color=0xe74c3c
         ))
 
