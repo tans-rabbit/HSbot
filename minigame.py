@@ -323,7 +323,6 @@ class LeaderboardView(discord.ui.View):
             embed=self.get_embed(),
             view=self
         )
-`
 
 
 @app_commands.command(
