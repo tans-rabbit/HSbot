@@ -236,14 +236,106 @@ async def bal(
 # リーダーボード
 # =========================
 
-@app_commands.command(name="leaderboard", description="ポイントランキング")
+class LeaderboardView(discord.ui.View):
+    def __init__(self, bot, ranking):
+        super().__init__(timeout=120)
+        self.bot = bot
+        self.ranking = ranking
+        self.page = 0
+        self.per_page = 16
+
+    def get_embed(self):
+
+        start = self.page * self.per_page
+        end = start + self.per_page
+
+        lines = []
+
+        for rank, (uid, user_data) in enumerate(
+            self.ranking[start:end],
+            start=start + 1
+        ):
+            user = self.bot.get_user(int(uid))
+
+            name = user.name if user else f"Unknown ({uid})"
+
+            points = user_data["points"]
+
+            medal = ""
+
+            if rank == 1:
+                medal = "🥇"
+            elif rank == 2:
+                medal = "🥈"
+            elif rank == 3:
+                medal = "🥉"
+
+            lines.append(
+                f"{medal} **{rank}位** {name} - {points:,}pt"
+            )
+
+        max_page = (
+            len(self.ranking) - 1
+        ) // self.per_page + 1
+
+        embed = discord.Embed(
+            title="🏆 ポイントランキング",
+            description="\n".join(lines),
+            color=0xf1c40f
+        )
+
+        embed.set_footer(
+            text=f"ページ {self.page + 1}/{max_page} | 参加者数: {len(self.ranking)}人"
+        )
+
+        return embed
+
+    @discord.ui.button(label="◀️", style=discord.ButtonStyle.gray)
+    async def prev(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        if self.page > 0:
+            self.page -= 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+    @discord.ui.button(label="▶️", style=discord.ButtonStyle.gray)
+    async def next(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        max_page = (
+            len(self.ranking) - 1
+        ) // self.per_page
+
+        if self.page < max_page:
+            self.page += 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+`
+
+
+@app_commands.command(
+    name="leaderboard",
+    description="ポイントランキング"
+)
 async def leaderboard(interaction: discord.Interaction):
 
     bot = interaction.client
 
     data, _ = await db.load_point(bot)
 
-    # ポイント順にソート
     ranking = sorted(
         data.items(),
         key=lambda x: x[1]["points"],
@@ -255,43 +347,12 @@ async def leaderboard(interaction: discord.Interaction):
             "📭 データがありません"
         )
 
-    lines = []
+    view = LeaderboardView(bot, ranking)
 
-    for i, (uid, user_data) in enumerate(ranking[:10], start=1):
-
-        user = bot.get_user(int(uid))
-
-        if user:
-            name = user.name
-        else:
-            name = f"Unknown ({uid})"
-
-        points = user_data["points"]
-
-        medal = ""
-
-        if i == 1:
-            medal = "🥇"
-        elif i == 2:
-            medal = "🥈"
-        elif i == 3:
-            medal = "🥉"
-
-        lines.append(
-            f"{medal} **{i}位** {name} - {points:,}pt"
-        )
-
-    embed = discord.Embed(
-        title="🏆 ポイントランキング",
-        description="\n".join(lines),
-        color=0xf1c40f
+    await interaction.response.send_message(
+        embed=view.get_embed(),
+        view=view
     )
-
-    embed.set_footer(
-        text=f"参加者数: {len(data)}人"
-    )
-
-    await interaction.response.send_message(embed=embed)
 
 
 
