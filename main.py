@@ -515,7 +515,6 @@ async def dice(ctx, arg: str):
 
 
 #==== メッセージ削除コマンド =====
-
 @bot.command(name="delall")
 @is_admin()
 async def delall(ctx, message_id: int):
@@ -525,27 +524,38 @@ async def delall(ctx, message_id: int):
     except:
         return await ctx.send("❌ メッセージが見つかりません")
 
-    deleted = 0
+    # ✅ 一括削除（14日以内のみ）
+    deleted_messages = await ctx.channel.purge(
+        limit=None,
+        after=target_message
+    )
 
-    async for msg in ctx.channel.history(limit=None, after=target_message):
-        try:
-            await msg.delete()
-            deleted += 1
-        except:
-            pass
+    deleted = len(deleted_messages)
 
     embed = discord.Embed(
         title="🧹 チャンネル削除",
-        description=f"delall:**{deleted}件** のメッセージを削除しました",
+        description=f"delall: **{deleted}件** のメッセージを削除しました",
         color=0xff0000
     )
     embed.timestamp = datetime.datetime.now(datetime.UTC)
 
     embed.set_footer(
-        text=ctx.author
+        text=str(ctx.author)
     )
-    print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages after message ID {message_id} using !delall.",RESET)
-    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages after message ID {message_id} using !delall.")
+
+    print(
+        RED, BOLD,
+        f"[{datetime.datetime.now()}] {ctx.author}",
+        RESET,
+        f" deleted {deleted} messages after message ID {message_id} using !delall.",
+        RESET
+    )
+
+    await send_log(
+        bot,
+        f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages after message ID {message_id} using !delall."
+    )
+
     await ctx.send(embed=embed)
 
 #=== メッセージ削除コマンド（ユーザー件数指定） =====
