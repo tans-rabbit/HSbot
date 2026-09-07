@@ -567,30 +567,60 @@ async def delnum(ctx, member: discord.Member, count: int):
     if count <= 0:
         return await ctx.send("❌ 件数は1以上")
 
-    deleted = 0
+    messages = []
 
     async for msg in ctx.channel.history(limit=1000):
         if msg.author == member:
-            try:
-                await msg.delete()
-                deleted += 1
-            except:
-                pass
+            messages.append(msg)
 
-            if deleted >= count:
+            if len(messages) >= count:
                 break
+
+    deleted = len(messages)
+
+    if deleted == 1:
+        try:
+            await messages[0].delete()
+        except:
+            pass
+
+    elif deleted >= 2:
+        try:
+            await ctx.channel.delete_messages(messages)
+        except:
+            pass
 
     await timeout_member(member, 5)
 
     embed = discord.Embed(
         title="🧹 メッセージ削除",
-        description=f"delnum: {member.mention} のメッセージを **{deleted}件** 削除しました。\nタイムアウト：5分",
+        description=(
+            f"delnum: {member.mention} のメッセージを "
+            f"**{deleted}件** 削除しました。\n"
+            f"タイムアウト：5分"
+        ),
         color=0xff0000
     )
+
     embed.timestamp = datetime.datetime.now(datetime.UTC)
-    embed.set_footer(text=ctx.author)
-    print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !delnum, count {count}.",RESET)
-    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delnum, count {count}.")
+
+    embed.set_footer(
+        text=str(ctx.author)
+    )
+
+    print(
+        RED, BOLD,
+        f"[{datetime.datetime.now()}] {ctx.author}",
+        RESET,
+        f" deleted {deleted} messages from {member} using !delnum, count {count}.",
+        RESET
+    )
+
+    await send_log(
+        bot,
+        f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delnum, count {count}."
+    )
+
     await ctx.send(embed=embed)
 
 #=== メッセージ削除コマンド（ユーザー時間指定） =====
@@ -605,29 +635,48 @@ async def deltime(ctx, member: discord.Member, minutes: int):
     now = datetime.datetime.now()
     delta = datetime.timedelta(minutes=minutes)
 
-    deleted = 0
+    deleted_messages = await ctx.channel.purge(
+        limit=None,
+        check=lambda m:
+            m.author.id == member.id
+            and (now - m.created_at.replace(tzinfo=None)) <= delta
+    )
 
-    async for msg in ctx.channel.history(limit=None):
-        if msg.author == member:
-            if now - msg.created_at.replace(tzinfo=None) <= delta:
-                try:
-                    await msg.delete()
-                    deleted += 1
-                except:
-                    pass
+    deleted = len(deleted_messages)
 
     await timeout_member(member, 5)
 
     embed = discord.Embed(
         title="🧹 メッセージ削除",
-        description=f"deltime: {member.mention} のメッセージを **{deleted}件** 削除しました。\nタイムアウト：5分",
+        description=(
+            f"deltime: {member.mention} のメッセージを "
+            f"**{deleted}件** 削除しました。\n"
+            f"タイムアウト：5分"
+        ),
         color=0xff0000
     )
+
     embed.timestamp = datetime.datetime.now(datetime.UTC)
-    embed.set_footer(text=ctx.author)
-    print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !deltime, within {minutes} minutes.",RESET)
-    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !deltime, within {minutes} minutes.")
+
+    embed.set_footer(
+        text=str(ctx.author)
+    )
+
+    print(
+        RED, BOLD,
+        f"[{datetime.datetime.now()}] {ctx.author}",
+        RESET,
+        f" deleted {deleted} messages from {member} using !deltime, within {minutes} minutes.",
+        RESET
+    )
+
+    await send_log(
+        bot,
+        f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !deltime, within {minutes} minutes."
+    )
+
     await ctx.send(embed=embed)
+
 
 #=== メッセージ削除コマンド（ユーザー指定・メッセージID以降） =====
 
@@ -640,27 +689,45 @@ async def delfrom(ctx, member: discord.Member, message_id: int):
     except:
         return await ctx.send("❌ メッセージが見つかりません")
 
-    deleted = 0
+    deleted_messages = await ctx.channel.purge(
+        limit=None,
+        after=target_message,
+        check=lambda m: m.author.id == member.id
+    )
 
-    async for msg in ctx.channel.history(limit=None, after=target_message):
-        if msg.author == member:
-            try:
-                await msg.delete()
-                deleted += 1
-            except:
-                pass
+    deleted = len(deleted_messages)
 
     await timeout_member(member, 5)
 
     embed = discord.Embed(
         title="🧹 メッセージ削除",
-        description=f"delfrom: {member.mention} のメッセージを **{deleted}件** 削除しました。\nタイムアウト：5分",
+        description=(
+            f"delfrom: {member.mention} のメッセージを "
+            f"**{deleted}件** 削除しました。\n"
+            f"タイムアウト：5分"
+        ),
         color=0xff0000
     )
+
     embed.timestamp = datetime.datetime.now(datetime.UTC)
-    embed.set_footer(text=ctx.author)
-    print(RED,BOLD,f"[{datetime.datetime.now()}] {ctx.author}",RESET,f" deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}.",RESET)
-    await send_log(bot, f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}.")
+
+    embed.set_footer(
+        text=str(ctx.author)
+    )
+
+    print(
+        RED, BOLD,
+        f"[{datetime.datetime.now()}] {ctx.author}",
+        RESET,
+        f" deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}.",
+        RESET
+    )
+
+    await send_log(
+        bot,
+        f"🧹 メッセージ削除：{ctx.author} deleted {deleted} messages from {member} using !delfrom, after message ID {message_id}."
+    )
+
     await ctx.send(embed=embed)
 
 #==== モーダル入力によるメッセージ削除 =====
@@ -702,83 +769,147 @@ class DelModal(discord.ui.Modal):
         # 管理者チェック
         if not interaction.user.guild_permissions.administrator:
             return await interaction.response.send_message(
-                "❌ 権限がありません", ephemeral=True
+                "❌ 権限がありません",
+                ephemeral=True
             )
 
         value = self.value.value
         deleted = 0
 
         try:
+
             # =====================
             # 時間指定
             # =====================
             if self.mode == "time":
+
                 minutes = int(value)
+
+                if minutes <= 0:
+                    raise ValueError
 
                 now = datetime.datetime.now()
                 delta = datetime.timedelta(minutes=minutes)
 
-                async for msg in interaction.channel.history(limit=None):
-                    if msg.author == self.member:
-                        if now - msg.created_at.replace(tzinfo=None) <= delta:
-                            try:
-                                await msg.delete()
-                                deleted += 1
-                            except:
-                                pass
+                deleted_messages = await interaction.channel.purge(
+                    limit=None,
+                    check=lambda m:
+                        m.author.id == self.member.id
+                        and (
+                            now - m.created_at.replace(tzinfo=None)
+                        ) <= delta
+                )
+
+                deleted = len(deleted_messages)
 
             # =====================
             # 件数指定
             # =====================
             elif self.mode == "count":
+
                 count = int(value)
 
-                async for msg in interaction.channel.history(limit=1000):
-                    if msg.author == self.member:
-                        try:
-                            await msg.delete()
-                            deleted += 1
-                        except:
-                            pass
+                if count <= 0:
+                    raise ValueError
 
-                        if deleted >= count:
+                messages = []
+
+                async for msg in interaction.channel.history(limit=1000):
+
+                    if msg.author.id == self.member.id:
+
+                        messages.append(msg)
+
+                        if len(messages) >= count:
                             break
+
+                deleted = len(messages)
+
+                if deleted == 1:
+
+                    await messages[0].delete()
+
+                elif deleted >= 2:
+
+                    if deleted > 100:
+
+                        for i in range(0, deleted, 100):
+
+                            await interaction.channel.delete_messages(
+                                messages[i:i + 100]
+                            )
+
+                    else:
+
+                        await interaction.channel.delete_messages(
+                            messages
+                        )
 
             # =====================
             # 開始地点指定
             # =====================
             elif self.mode == "from":
-                target = await interaction.channel.fetch_message(int(value))
 
-                async for msg in interaction.channel.history(limit=None, after=target):
-                    if msg.author == self.member:
-                        try:
-                            await msg.delete()
-                            deleted += 1
-                        except:
-                            pass
+                target = await interaction.channel.fetch_message(
+                    int(value)
+                )
+
+                deleted_messages = await interaction.channel.purge(
+                    limit=None,
+                    after=target,
+                    check=lambda m:
+                        m.author.id == self.member.id
+                )
+
+                deleted = len(deleted_messages)
 
         except:
+
             return await interaction.response.send_message(
                 "❌ 入力が不正です",
                 ephemeral=True
             )
 
-        # ✅ タイムアウト（※delall以外仕様）
+        # ✅ タイムアウト
         await timeout_member(self.member, 5)
 
-        # ✅ ログ
         embed = discord.Embed(
             title="🧹 メッセージ削除",
-            description=f"{self.member.mention} のメッセージを **{deleted}件** 削除しました。\nタイムアウト：5分",
+            description=(
+                f"{self.member.mention} のメッセージを "
+                f"**{deleted}件** 削除しました。\n"
+                f"タイムアウト：5分"
+            ),
             color=0xff0000
         )
+
         embed.timestamp = datetime.datetime.now(datetime.UTC)
-        embed.set_footer(text=bot.user.name)
-        print(RED,BOLD,f"[{datetime.datetime.now()}] {interaction.user}",RESET,f" deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'.",RESET)
-        await send_log(bot, f"🧹 メッセージ削除：{interaction.user} deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'.")
-        await interaction.response.send_message(embed=embed)
+
+        embed.set_footer(
+            text=bot.user.name
+        )
+
+        print(
+            RED,
+            BOLD,
+            f"[{datetime.datetime.now()}] {interaction.user}",
+            RESET,
+            f" deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'.",
+            RESET
+        )
+
+        await send_log(
+            bot,
+            f"🧹 メッセージ削除：{interaction.user} deleted {deleted} messages from {self.member} using /del, mode '{self.mode}'."
+        )
+
+        await interaction.response.send_message(
+            embed=embed
+        )
+
+
 #==== 上記を踏まえたスラッシュコマンドによるメッセージ削除 =====
+
 @bot.tree.command(name="del", description="メッセージ削除（入力パネル）")
 @app_commands.describe(
     mode="削除方法",
@@ -802,9 +933,9 @@ async def del_command(
             ephemeral=True
         )
 
-    # ✅ モーダル表示
-    await interaction.response.send_modal(DelModal(mode.value, member))
-
+    await interaction.response.send_modal(
+        DelModal(mode.value, member)
+    )
 
 
 
