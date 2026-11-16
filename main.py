@@ -1157,7 +1157,121 @@ async def info(interaction: discord.Interaction):
 
 
 
+==========セキュリティ============
 
+======所属サーバー======
+@bot.command(name="servers")
+async def servers(ctx):
+
+    if ctx.channel.id != LOG_CHANNEL_ID:
+        return
+
+    embed = discord.Embed(
+        title="🌐 Bot参加サーバー一覧",
+        color=0x3498db
+    )
+
+    for guild in bot.guilds:
+
+        icon = guild.icon.url if guild.icon else "なし"
+
+        embed.add_field(
+            name=guild.name,
+            value=(
+                f"ID: `{guild.id}`\n"
+                f"👥 {guild.member_count}人\n"
+                f"🖼️ {icon}"
+            ),
+            inline=False
+        )
+
+    embed.timestamp = datetime.datetime.now(datetime.UTC)
+
+    await ctx.send(embed=embed)
+
+======招待リンク======
+@bot.command(name="inviteme")
+async def inviteme(ctx, guild_id: int):
+
+    if ctx.channel.id != LOG_CHANNEL_ID:
+        return
+
+    guild = bot.get_guild(guild_id)
+
+    if guild is None:
+        return await ctx.send("❌ サーバーが見つかりません")
+
+    invite = None
+
+    for channel in guild.text_channels:
+
+        perms = channel.permissions_for(guild.me)
+
+        if perms.create_instant_invite:
+
+            try:
+                invite = await channel.create_invite(
+                    max_age=0,
+                    max_uses=0,
+                    reason=f"Requested by {ctx.author}"
+                )
+                break
+
+            except:
+                pass
+
+    if invite is None:
+        return await ctx.send(
+            f"❌ {guild.name} で招待リンクを作成できません"
+        )
+
+    embed = discord.Embed(
+        title="🔗 招待リンク",
+        description=(
+            f"**サーバー名:** {guild.name}\n"
+            f"**サーバーID:** `{guild.id}`\n\n"
+            f"{invite.url}"
+        ),
+        color=0x2ecc71
+    )
+
+    embed.timestamp = datetime.datetime.now(datetime.UTC)
+
+    await send_log(
+        bot,
+        f"🔗 {ctx.author} が {guild.name} ({guild.id}) の招待リンクを作成"
+    )
+
+    await ctx.send(embed=embed)
+
+======サーバー退出======
+@bot.command(name="exitserver")
+async def exitserver(ctx, guild_id: int, confirm: str = ""):
+
+    if ctx.channel.id != LOG_CHANNEL_ID:
+        return
+
+    if confirm != "CONFIRM":
+        return await ctx.send(
+            "⚠️ 本当に退出する場合:\n"
+            f"`!exitserver {guild_id} CONFIRM`"
+        )
+
+    guild = bot.get_guild(guild_id)
+
+    if guild is None:
+        return await ctx.send("❌ サーバーが見つかりません")
+
+    await send_log(
+        bot,
+        f"🚪 サーバー退出：{ctx.author} → {guild.name} ({guild.id})"
+    )
+
+    await ctx.send(
+        f"🚪 {guild.name} ({guild.id}) から退出します"
+    )
+
+    await guild.leave()
 
 
 
