@@ -1157,9 +1157,9 @@ async def info(interaction: discord.Interaction):
 
 
 
-==========セキュリティ============
+#==========セキュリティ============
 
-======所属サーバー======
+#======所属サーバー======
 @bot.command(name="servers")
 async def servers(ctx):
 
@@ -1189,7 +1189,7 @@ async def servers(ctx):
 
     await ctx.send(embed=embed)
 
-======招待リンク======
+#======招待リンク======
 @bot.command(name="inviteme")
 async def inviteme(ctx, guild_id: int):
 
@@ -1244,7 +1244,7 @@ async def inviteme(ctx, guild_id: int):
 
     await ctx.send(embed=embed)
 
-======サーバー退出======
+#======サーバー退出======
 @bot.command(name="exitserver")
 async def exitserver(ctx, guild_id: int, confirm: str = ""):
 
