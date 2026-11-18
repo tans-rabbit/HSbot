@@ -1159,35 +1159,112 @@ async def info(interaction: discord.Interaction):
 
 #==========セキュリティ============
 
-#======所属サーバー======
+# ===== サーバー一覧 =====
+
+class ServersView(discord.ui.View):
+
+    def __init__(self, guilds):
+        super().__init__(timeout=300)
+
+        self.guilds = guilds
+        self.page = 0
+        self.per_page = 16
+
+    def get_embed(self):
+
+        start = self.page * self.per_page
+        end = start + self.per_page
+
+        embed = discord.Embed(
+            title="🌐 Bot参加サーバー一覧",
+            color=0x3498db
+        )
+
+        for guild in self.guilds[start:end]:
+
+            icon = guild.icon.url if guild.icon else "なし"
+
+            embed.add_field(
+                name=guild.name,
+                value=(
+                    f"ID: `{guild.id}`\n"
+                    f"👥 {guild.member_count}人\n"
+                    f"🖼️ {icon}"
+                ),
+                inline=False
+            )
+
+        pages = (len(self.guilds) - 1) // self.per_page + 1
+
+        embed.set_footer(
+            text=f"ページ {self.page + 1}/{pages} | サーバー数: {len(self.guilds)}"
+        )
+
+        return embed
+
+    @discord.ui.button(label="◀️", style=discord.ButtonStyle.gray)
+    async def prev(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        if self.page > 0:
+            self.page -= 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+    @discord.ui.button(label="▶️", style=discord.ButtonStyle.gray)
+    async def next(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        max_page = (
+            len(self.guilds) - 1
+        ) // self.per_page
+
+        if self.page < max_page:
+            self.page += 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+
 @bot.command(name="servers")
 async def servers(ctx):
 
     if ctx.channel.id != LOG_CHANNEL_ID:
         return
 
-    embed = discord.Embed(
-        title="🌐 Bot参加サーバー一覧",
-        color=0x3498db
+    # 実行者が入っているサーバー
+    user_guild_ids = {
+        guild.id
+        for guild in bot.guilds
+        if guild.get_member(ctx.author.id)
+    }
+
+    # 実行者が入ってないサーバーを上へ
+    guilds = sorted(
+        bot.guilds,
+        key=lambda g: (
+            g.id in user_guild_ids,
+            g.name.lower()
+        )
     )
 
-    for guild in bot.guilds:
+    view = ServersView(guilds)
 
-        icon = guild.icon.url if guild.icon else "なし"
-
-        embed.add_field(
-            name=guild.name,
-            value=(
-                f"ID: `{guild.id}`\n"
-                f"👥 {guild.member_count}人\n"
-                f"🖼️ {icon}"
-            ),
-            inline=False
-        )
-
-    embed.timestamp = datetime.datetime.now(datetime.UTC)
-
-    await ctx.send(embed=embed)
+    await ctx.send(
+        embed=view.get_embed(),
+        view=view
+    )
 
 #======招待リンク======
 @bot.command(name="inviteme")
